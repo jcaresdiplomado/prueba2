@@ -33,6 +33,12 @@ jobs:
     - name: Run Docker container
       run: docker run -d -p 8080:8080 --name prueba2 prueba2-app
 
+    - name: Wait for Spring Boot to start
+      run: sleep 20
+
+    - name: Show Docker logs
+      run: docker logs prueba2
+
     # Paso 6: Verificar que el contenedor está corriendo
     - name: Verify Docker container is running
       run: docker ps
