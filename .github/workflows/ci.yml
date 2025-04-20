@@ -30,7 +30,7 @@ jobs:
 
       - name: Esperar a que la app esté disponible
         run: |
-          for i in {1..15}; do
+          for i in {1..5}; do
             if curl -s http://localhost:8080; then
               echo "App disponible ✅"
               exit 0
