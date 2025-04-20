@@ -6,6 +6,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/calculadora")
 public class CalculadoraController {
 
+    @GetMapping("/")
+    public String mostrarCalculadora() {
+        return "calculadora";
+    }
+
     @GetMapping("/sumar")
     public double sumar(@RequestParam double a, @RequestParam double b) {
         return a + b;

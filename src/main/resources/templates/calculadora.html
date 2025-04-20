@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Calculadora</title>
+    <meta charset="UTF-8">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora</title>
+</head>
+<body>
+    <h1>Calculadora Básica</h1>
+    <form id="formulario" method="get">
+        <label>Número 1:</label>
+        <input type="number" name="num1" required><br><br>
+
+        <label>Número 2:</label>
+        <input type="number" name="num2" required><br><br>
+
+        <label>Operación:</label>
+        <select id="operacion" name="operacion">
+            <option value="sumar">Sumar</option>
+            <option value="restar">Restar</option>
+            <option value="multiplicar">Multiplicar</option>
+            <option value="dividir">Dividir</option>
+        </select><br><br>
+
+        <button type="submit">Calcular</button>
+    </form>
+
+    <div th:if="${resultado != null}">
+        <h2>Resultado: <span th:text="${resultado}"></span></h2>
+    </div>
+
+    <script>
+        document.getElementById("formulario").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const op = document.getElementById("operacion").value;
+            const num1 = this.num1.value;
+            const num2 = this.num2.value;
+            this.action = `/${op}`;
+            this.submit();
+        });
+    </script>
+</body>
+</html>
