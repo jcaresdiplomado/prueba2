@@ -20,22 +20,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Instalar Google Chrome y ChromeDriver
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
-          wget -q "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION.0.0/linux64/chromedriver-linux64.zip"
-          unzip chromedriver-linux64.zip
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
-          chromedriver --version
-
       - name: Compilar y empaquetar la app (sin tests)
         run: mvn clean package spring-boot:repackage -DskipTests
 
+      - name: Instalar Chrome y ChromeDriver desde repositorios compatibles
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-chromedriver chromium-browser
+          sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/local/bin/chromedriver
+          chromedriver --version
+
       - name: Ejecutar la aplicación en segundo plano
         run: |
-          java -jar target/*.jar > app.log 2>&1 &
+          java -Dspring.profiles.active=prod -Dheadless -jar target/*.jar &
           echo $! > pid.txt
 
       - name: Esperar que la app esté disponible
@@ -50,20 +47,23 @@ jobs:
             fi
           done
           echo "❌ La app no se levantó a tiempo"
-          cat app.log
           exit 1
 
-      - name: Ejecutar pruebas Selenium
+      - name: Probar endpoint de ejemplo
         run: |
-          mvn test -Dtest=CalculadoraUITest
+          echo "Probando endpoint /api/calculadora/sumar?a=5&b=7"
+          curl -v "http://localhost:8080/api/calculadora/sumar?a=5&b=7"
+
+      - name: Ejecutar pruebas de Selenium
+        run: |
+          mvn test -Dtest=com.ejemplo.calculadora.CalculadoraUITest
 
       - name: Mostrar logs de la app
         run: |
           echo "Logs de la app:"
-          cat app.log || echo "No se encontró el archivo de logs"
+          cat nohup.out || echo "No se encontró el archivo de logs"
 
       - name: Detener la aplicación
         run: |
           kill $(cat pid.txt) || echo "No se pudo detener la app"
-
 
