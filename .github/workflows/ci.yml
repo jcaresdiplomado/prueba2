@@ -43,3 +43,6 @@ jobs:
           echo "App did not start in time ❌"
           docker logs app
           exit 1
+
+      - name: Mostrar logs del contenedor
+        run: docker logs app || echo "No se pudieron obtener los logs del contenedor"
