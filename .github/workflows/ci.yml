@@ -50,7 +50,7 @@ jobs:
 
       - name: Expose app with localtunnel
         run: |
-          lt --port 8080 --subdomain springapp-${{ github.sha }}
+          lt --port 8080 &
 
       - name: Test calculadora endpoint
         run: |
@@ -59,3 +59,4 @@ jobs:
 
       - name: Mostrar logs del contenedor
         run: docker logs app || echo "No se pudieron obtener los logs del contenedor"
+
