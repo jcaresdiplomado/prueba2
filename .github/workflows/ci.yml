@@ -44,6 +44,14 @@ jobs:
           docker logs app
           exit 1
 
+      - name: Install localtunnel
+        run: |
+          npm install -g localtunnel
+
+      - name: Expose app with localtunnel
+        run: |
+          lt --port 8080 --subdomain springapp-${{ github.sha }}
+
       - name: Test calculadora endpoint
         run: |
           echo "Probando endpoint /api/calculadora/sumar?a=5&b=7"
