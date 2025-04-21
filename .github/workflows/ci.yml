@@ -44,13 +44,28 @@ jobs:
           docker logs app
           exit 1
 
-      - name: Install localtunnel
+      - name: Install ngrok
         run: |
-          npm install -g localtunnel
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://bin.equinox.io/c/4VmDzA7iaFg/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          sudo mv ngrok /usr/local/bin/
 
-      - name: Expose app with localtunnel
+      - name: Set up ngrok auth token
         run: |
-          lt --port 8080 &
+          echo "Setting up ngrok auth token"
+          ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start ngrok tunnel
+        run: |
+          ngrok http 8080 --log=stdout &
+
+      - name: Wait for ngrok to start
+        run: |
+          sleep 5
+          echo "ngrok started"
+          curl -s http://localhost:4040/api/tunnels
 
       - name: Test calculadora endpoint
         run: |
