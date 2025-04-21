@@ -44,10 +44,48 @@ jobs:
           docker logs app
           exit 1
 
+      - name: Descargar e instalar ngrok
+        run: |
+          curl -sL https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -o ngrok.zip
+          unzip ngrok.zip
+          chmod +x ngrok
+
+      - name: Autenticarse con ngrok
+        run: |
+          ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Iniciar ngrok
+        run: |
+          nohup ./ngrok http 8080 &
+
+      - name: Esperar a que ngrok genere la URL
+        run: |
+          echo "Esperando a que ngrok genere la URL del túnel..."
+          for i in {1..10}; do
+            tunnel_url=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+            if [[ "$tunnel_url" != "null" && -n "$tunnel_url" ]]; then
+              echo "La URL del túnel es: $tunnel_url"
+              echo "NGROK_TUNNEL_URL=$tunnel_url" >> $GITHUB_ENV
+              break
+            else
+              echo "Esperando por la URL del túnel... Intento $i"
+              sleep 3
+            fi
+          done
+
+      - name: Verificar URL del túnel
+        run: |
+          echo "URL del túnel almacenada: $NGROK_TUNNEL_URL"
+
       - name: Test calculadora endpoint
         run: |
+          if [ -z "$NGROK_TUNNEL_URL" ]; then
+            echo "Error: La URL del túnel no está disponible."
+            exit 1
+          fi
           echo "Probando endpoint /api/calculadora/sumar?a=5&b=7"
-          curl -v "http://localhost:8080/api/calculadora/sumar?a=5&b=7"
+          curl -v "$NGROK_TUNNEL_URL/api/calculadora/sumar?a=5&b=7"
 
       - name: Mostrar logs del contenedor
         run: docker logs app || echo "No se pudieron obtener los logs del contenedor"
+
