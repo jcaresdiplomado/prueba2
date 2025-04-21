@@ -51,4 +51,3 @@ jobs:
 
       - name: Mostrar logs del contenedor
         run: docker logs app || echo "No se pudieron obtener los logs del contenedor"
-``
