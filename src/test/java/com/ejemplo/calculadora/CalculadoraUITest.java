@@ -20,7 +20,11 @@ public class CalculadoraUITest {
         WebDriverManager.chromedriver().setup();
         
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage", "--user-data-dir=/tmp/chrome-user-data");
+        
+        // Si estamos ejecutando en CI, habilitar el modo sin cabeza
+        if (System.getenv("CI") != null) {
+            options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage", "--user-data-dir=/tmp/chrome-user-data");
+        }
         
         // Inicializar el driver con las opciones
         driver = new ChromeDriver(options);
@@ -56,5 +60,25 @@ public class CalculadoraUITest {
         WebElement resultado = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("h2")));
         Assertions.assertTrue(resultado.getText().contains("Resultado: 8"));
     }
+
+    @Test
+    public void testRestar() {
+        // Localizar los elementos del formulario
+        WebElement num1Input = driver.findElement(By.name("num1"));
+        WebElement num2Input = driver.findElement(By.name("num2"));
+        WebElement operacion = driver.findElement(By.name("operacion"));
+        WebElement boton = driver.findElement(By.cssSelector("button[type='submit']"));
+
+        // Ingresar los valores
+        num1Input.sendKeys("5");
+        num2Input.sendKeys("3");
+        operacion.sendKeys("Restar");
+        boton.click();
+
+        // Esperar y verificar el resultado
+        WebElement resultado = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("h2")));
+        Assertions.assertTrue(resultado.getText().contains("Resultado: 2"));
+    }
 }
+
 
