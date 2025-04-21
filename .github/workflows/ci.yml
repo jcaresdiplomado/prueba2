@@ -47,10 +47,15 @@ jobs:
       - name: Descargar ngrok
         run: |
           curl -sL https://ngrok.com/download/ngrok-v3-stable-linux-amd64.tgz -o ngrok.tgz
+          ls -lh ngrok.tgz  # Listar el archivo descargado para verificar su tamaño
 
-      - name: Descomprimir ngrok
+      - name: Verificar formato y descomprimir ngrok
         run: |
-          tar -xvzf ngrok.tgz
+          file ngrok.tgz  # Verifica el tipo de archivo descargado
+          tar -xvzf ngrok.tgz  # Descomprimir si es un archivo .tgz
+          
+      - name: Mover ngrok a binarios
+        run: |
           sudo mv ngrok /usr/local/bin
 
       - name: Iniciar ngrok
