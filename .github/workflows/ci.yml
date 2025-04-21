@@ -61,16 +61,28 @@ jobs:
       - name: Esperar a que ngrok genere la URL
         run: |
           echo "Esperando a que ngrok genere la URL del túnel..."
-          sleep 5  # Espera 5 segundos para asegurar que ngrok haya iniciado
+          for i in {1..10}; do
+            tunnel_url=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+            if [[ "$tunnel_url" != "null" && -n "$tunnel_url" ]]; then
+              echo "La URL del túnel es: $tunnel_url"
+              echo "NGROK_TUNNEL_URL=$tunnel_url" >> $GITHUB_ENV
+              break
+            else
+              echo "Esperando por la URL del túnel... Intento $i"
+              sleep 3
+            fi
+          done
 
-      - name: Obtener la URL del túnel ngrok
+      - name: Verificar URL del túnel
         run: |
-          tunnel_url=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
-          echo "La URL del túnel es: $tunnel_url"
-          echo "NGROK_TUNNEL_URL=$tunnel_url" >> $GITHUB_ENV  # Guarda la URL como variable de entorno
+          echo "URL del túnel almacenada: $NGROK_TUNNEL_URL"
 
       - name: Test calculadora endpoint
         run: |
+          if [ -z "$NGROK_TUNNEL_URL" ]; then
+            echo "Error: La URL del túnel no está disponible."
+            exit 1
+          fi
           echo "Probando endpoint /api/calculadora/sumar?a=5&b=7"
           curl -v "$NGROK_TUNNEL_URL/api/calculadora/sumar?a=5&b=7"
 
