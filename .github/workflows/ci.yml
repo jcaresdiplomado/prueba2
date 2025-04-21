@@ -44,32 +44,27 @@ jobs:
           docker logs app
           exit 1
 
-      - name: Descargar ngrok
+      - name: Descargar e instalar ngrok
         run: |
           curl -sL https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -o ngrok.zip
-          ls -lh ngrok.zip  # Verifica el archivo descargado
+          unzip ngrok.zip
+          chmod +x ngrok
 
-      - name: Verificar formato y descomprimir ngrok
+      - name: Autenticarse con ngrok
         run: |
-          file ngrok.zip  # Verifica el tipo de archivo descargado
-          unzip -q ngrok.zip  # Descomprimir si es un archivo .zip
-
-      - name: Mover ngrok a binarios
-        run: |
-          sudo mv ngrok /usr/local/bin/
-          sudo chmod +x /usr/local/bin/ngrok  # Asegura que ngrok sea ejecutable
-          which ngrok  # Verifica que ngrok esté en la ruta
+          ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
 
       - name: Iniciar ngrok
         run: |
-          ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-          nohup ngrok http 8080 &  # Ejecuta ngrok en segundo plano
+          nohup ./ngrok http 8080 &
+
+      - name: Obtener la URL del túnel ngrok
+        run: |
+          tunnel_url=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          echo "La URL del túnel es: $tunnel_url"
+          echo "NGROK_TUNNEL_URL=$tunnel_url" >> $GITHUB_ENV  # Guarda la URL como variable de entorno
 
       - name: Test calculadora endpoint
         run: |
-          echo "Probando endpoint /api/calculadora/sumar?a=5&b=7"
-          curl -v "http://localhost:8080/api/calculadora/sumar?a=5&b=7"
-
-      - name: Mostrar logs del contenedor
-        run: docker logs app || echo "No se pudieron obtener los logs del contenedor"
+          echo "Probando endpoint
 
