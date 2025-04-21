@@ -20,12 +20,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Instalar Google Chrome y ChromeDriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
+          wget -q "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION.0.0/linux64/chromedriver-linux64.zip"
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          chromedriver --version
+
       - name: Compilar y empaquetar la app (sin tests)
         run: mvn clean package spring-boot:repackage -DskipTests
 
       - name: Ejecutar la aplicación en segundo plano
         run: |
-          java -jar target/*.jar &
+          java -jar target/*.jar > app.log 2>&1 &
           echo $! > pid.txt
 
       - name: Esperar que la app esté disponible
@@ -40,19 +50,20 @@ jobs:
             fi
           done
           echo "❌ La app no se levantó a tiempo"
+          cat app.log
           exit 1
 
-      - name: Probar endpoint de ejemplo
+      - name: Ejecutar pruebas Selenium
         run: |
-          echo "Probando endpoint /api/calculadora/sumar?a=5&b=7"
-          curl -v "http://localhost:8080/api/calculadora/sumar?a=5&b=7"
+          mvn test -Dtest=CalculadoraUITest
 
       - name: Mostrar logs de la app
         run: |
           echo "Logs de la app:"
-          cat nohup.out || echo "No se encontró el archivo de logs"
+          cat app.log || echo "No se encontró el archivo de logs"
 
       - name: Detener la aplicación
         run: |
           kill $(cat pid.txt) || echo "No se pudo detener la app"
+
 
