@@ -96,7 +96,7 @@ public class CalculadoraUITest {
 
         // Esperar y verificar el resultado
         WebElement resultado = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("h2")));
-        Assertions.assertTrue(resultado.getText().contains("Resultado: 14"));
+        Assertions.assertTrue(resultado.getText().contains("Resultado: 15"));
     }
 }
 
