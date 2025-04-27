@@ -31,6 +31,8 @@ jobs:
           args: >
             -Dsonar.projectKey=prueba2
             -Dsonar.organization=jcaresdiplomado
+            -Dsonar.language=java
+            -Dsonar.java.binaries=target/classes
 
       - name: Compilar y empaquetar la app (sin tests)
         run: mvn clean package spring-boot:repackage -DskipTests
