@@ -32,7 +32,7 @@ jobs:
         with:
           # Parámetros específicos para tu proyecto
           args: >
-            -Dsonar.projectKey=prueba2
+            -Dsonar.projectKey=jcaresdiplomado_prueba2
             -Dsonar.organization=jcaresdiplomado
             -Dsonar.language=java
             -Dsonar.java.binaries=target/classes
